@@ -38,6 +38,25 @@ func ForEachFile(dirPath string, ext string, callback func(string) error) ([]str
 	return textFiles, err
 }
 
+func ForEveryFile(dirPath string, callback func(string) error) ([]string, error) {
+	var textFiles []string
+	err := filepath.Walk(dirPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() {
+			textFiles = append(textFiles, path)
+			err = callback(path)
+			// generate an error to stop the walk
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+	return textFiles, err
+}
+
 func ReadTextFile(path string) (string, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
